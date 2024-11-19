@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hatopia_mobile/models/mood_entry.dart';
+import 'package:hatopia_mobile/screens/list_product.dart';
+import 'package:hatopia_mobile/screens/login.dart';
 import 'package:hatopia_mobile/screens/moodentry_form.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
 
 final List<ItemHomepage> items = [
   ItemHomepage("Lihat Product", Icons.mood, Colors.grey[400]!),
@@ -24,6 +29,7 @@ class ItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
     return Material(
       // Menentukan warna latar belakang dari tema aplikasi.
       color: item.color,
@@ -32,8 +38,8 @@ class ItemCard extends StatelessWidget {
 
       child: InkWell(
         // Aksi ketika kartu ditekan.
-        onTap: () {
-          // Menampilkan pesan SnackBar saat kartu ditekan.
+        onTap: () async {
+          // Memunculkan SnackBar ketika diklik
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(SnackBar(
@@ -42,10 +48,38 @@ class ItemCard extends StatelessWidget {
           // Navigate ke route yang sesuai (tergantung jenis tombol)
           if (item.name == "Tambahkan Product") {
             Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MoodentryForm(),
+                ));
+          } else if (item.name == "Lihat Product") {
+            Navigator.push(
               context,
-              MaterialPageRoute(
-                  builder: (context) => const MoodEntryFormPage()),
+              MaterialPageRoute(builder: (context) => const ProductEntryPage()),
             );
+          } else if (item.name == "Logout") {
+            final response = await request.logout(
+                // TODO: Ganti URL dan jangan lupa tambahkan trailing slash (/) di akhir URL!
+                "http://127.0.0.1:8000/auth/logout/");
+            String message = response["message"];
+            if (context.mounted) {
+              if (response['status']) {
+                String uname = response["username"];
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text("$message Sampai jumpa, $uname."),
+                ));
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginPage()),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(message),
+                  ),
+                );
+              }
+            }
           }
         },
 

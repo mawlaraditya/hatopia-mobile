@@ -1,162 +1,214 @@
-import 'package:flutter/material.dart';
-import 'package:hatopia_mobile/widgets/left_drawer.dart';
+import 'dart:convert';
 
-class MoodEntryFormPage extends StatefulWidget {
-  const MoodEntryFormPage({super.key});
+import 'package:flutter/material.dart';
+import 'package:hatopia_mobile/screens/menu.dart';
+import 'package:hatopia_mobile/widgets/left_drawer.dart';
+import 'package:hatopia_mobile/models/mood_entry.dart';
+import 'package:pbp_django_auth/pbp_django_auth.dart';
+import 'package:provider/provider.dart';
+
+class MoodentryForm extends StatefulWidget {
+  const MoodentryForm({super.key});
 
   @override
-  State<MoodEntryFormPage> createState() => _MoodEntryFormPageState();
+  State<MoodentryForm> createState() => _MoodentryFormState();
 }
 
-class _MoodEntryFormPageState extends State<MoodEntryFormPage> {
+class _MoodentryFormState extends State<MoodentryForm> {
   final _formKey = GlobalKey<FormState>();
-  String _mood = "";
-  String _feelings = "";
-  int _moodIntensity = 0;
+  String _product = "";
+  String _description = "";
+  int _price = 0;
+  int _stock = 0;
+  String _image = "";
 
   @override
   Widget build(BuildContext context) {
+    final request = context.watch<CookieRequest>();
+
     return Scaffold(
-        appBar: AppBar(
-          title: const Center(
-            child: Text(
-              'Tambahkan Product Disini',
-            ),
-          ),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: const Color.fromARGB(255, 255, 255, 255),
-        ),
-        drawer: const LeftDrawer(),
-        body: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      hintText: "Nama Product Anda",
-                      labelText: "Product",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
+      appBar: AppBar(
+        title: const Text('Add New Product'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+      ),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Product Name Field
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: "Product Name",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
                     ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _mood = value!;
-                      });
-                    },
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return "Product tidak boleh kosong!";
-                      }
-                      return null;
-                    },
                   ),
+                  onChanged: (String? value) {
+                    setState(() {
+                      _product = value!;
+                    });
+                  },
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return "Product name cannot be empty";
+                    }
+                    return null;
+                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      hintText: "Description Product Anda",
-                      labelText: "Description",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
+              ),
+
+              // Description Field
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: "Description",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
                     ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _feelings = value!;
-                      });
-                    },
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return "Description tidak boleh kosong!";
-                      }
-                      return null;
-                    },
                   ),
+                  onChanged: (String? value) {
+                    setState(() {
+                      _description = value!;
+                    });
+                  },
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return "Description cannot be empty";
+                    }
+                    return null;
+                  },
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                      hintText: "Harga Product Anda",
-                      labelText: "Price",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
+              ),
+
+              // Price Field
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: "Price",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
                     ),
-                    onChanged: (String? value) {
-                      setState(() {
-                        _moodIntensity = int.tryParse(value!) ?? 0;
-                      });
-                    },
-                    validator: (String? value) {
-                      if (value == null || value.isEmpty) {
-                        return "Price tidak boleh kosong!";
-                      }
-                      if (int.tryParse(value) == null) {
-                        return "Price harus berupa angka!";
-                      }
-                      return null;
-                    },
                   ),
+                  onChanged: (String? value) {
+                    setState(() {
+                      _price = int.tryParse(value!) ?? 0;
+                    });
+                  },
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return "Price cannot be empty";
+                    }
+                    if (int.tryParse(value) == null) {
+                      return "Price must be a number";
+                    }
+                    return null;
+                  },
                 ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(
-                            Theme.of(context).colorScheme.primary),
-                      ),
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text('Product berhasil tersimpan'),
-                                content: SingleChildScrollView(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text('Product: $_mood'),
-                                      Text('Description: $_feelings'),
-                                      Text('Price: $_moodIntensity')
-                                      // TODO: Munculkan value-value lainnya
-                                    ],
-                                  ),
-                                ),
-                                actions: [
-                                  TextButton(
-                                    child: const Text('OK'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      _formKey.currentState!.reset();
-                                    },
-                                  ),
-                                ],
-                              );
-                            },
+              ),
+
+              // Stock Field
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: "Stock",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  onChanged: (String? value) {
+                    setState(() {
+                      _stock = int.tryParse(value!) ?? 0;
+                    });
+                  },
+                  validator: (String? value) {
+                    if (value == null || value.isEmpty) {
+                      return "Stock cannot be empty";
+                    }
+                    if (int.tryParse(value) == null) {
+                      return "Stock must be a number";
+                    }
+                    return null;
+                  },
+                ),
+              ),
+
+              // Image URL Field
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextFormField(
+                  decoration: InputDecoration(
+                    labelText: "Image URL",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                  ),
+                  onChanged: (String? value) {
+                    setState(() {
+                      _image = value!;
+                    });
+                  },
+                ),
+              ),
+
+              // Submit Button
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(
+                      Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      final response = await request.postJson(
+                        "http://127.0.0.1:8000/create-flutter/",
+                        jsonEncode({
+                          'product': _product,
+                          'desc': _description,
+                          'price': _price,
+                          'stock': _stock,
+                          'image': _image,
+                        }),
+                      );
+
+                      if (context.mounted) {
+                        if (response['status'] == 'success') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Product added successfully!")),
+                          );
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MyHomePage()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Failed to add product")),
                           );
                         }
-                      },
-                      child: const Text(
-                        "Save",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
+                      }
+                    }
+                  },
+                  child: const Text(
+                    "Save Product",
+                    style: TextStyle(color: Colors.white),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
