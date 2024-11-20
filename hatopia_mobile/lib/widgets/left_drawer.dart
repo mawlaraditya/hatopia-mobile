@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hatopia_mobile/screens/menu.dart';
 import 'package:hatopia_mobile/screens/moodentry_form.dart';
+import 'package:hatopia_mobile/screens/list_product.dart'; // Add this import
 
 class LeftDrawer extends StatelessWidget {
   const LeftDrawer({super.key});
@@ -41,7 +42,6 @@ class LeftDrawer extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.home_outlined),
             title: const Text('Halaman Utama'),
-            // Bagian redirection ke MyHomePage
             onTap: () {
               Navigator.pushReplacement(
                   context,
@@ -54,10 +54,20 @@ class LeftDrawer extends StatelessWidget {
             leading: const Icon(Icons.add_reaction_rounded),
             title: const Text('Tambahkan Product'),
             onTap: () {
-              // Route menu ke halaman mood
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const MoodentryForm()),
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.list_alt_rounded),
+            title: const Text('Lihat Product'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const ProductEntryPage()),
               );
             },
           ),
